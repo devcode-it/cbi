@@ -1,0 +1,23 @@
+{
+    "name": "devcode-it/cbi",
+    "description": "Libreria per la gestione del formato CBI per pagamenti RiBa",
+    "authors": [{
+        "name": "DevCode s.n.c",
+        "email": "info@devcode.it"
+    }],
+    "type": "library",
+    "require": {
+        "php": ">=7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "DevCode\\CBI\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "apcu-autoloader": true,
+        "prefer-stable": true
+    }
+}
