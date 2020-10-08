@@ -81,6 +81,11 @@ class RiBa
         $ricevute = $this->ricevute;
         $contenuto = '';
 
+        // Verifica sulla presenza di ricevute
+        if (empty($ricevute)) {
+            throw new \Exception();
+        }
+
         // Record IB
         $ib = new RecordIB();
         $ib->codice_sia_mittente = $intestazione->codice_sia;
@@ -107,6 +112,7 @@ class RiBa
             $r14->abi_assuntrice = $intestazione->abi;
             $r14->cab_assuntrice = $intestazione->cab;
             $r14->conto_assuntrice = $intestazione->conto;
+            $r14->codice_azienda_creditrice = $intestazione->codice_sia;
 
             $r14->abi_domiciliataria = $ricevuta->abi_banca;
             $r14->cab_domiciliataria = $ricevuta->cab_banca;
