@@ -15,7 +15,7 @@ abstract class BaseRecord implements RecordInterface
 
         // Inizializzazione di tutti i campi
         foreach ($struttura as $nome => $campo) {
-            $this->{$nome} = $campo['valore'] ?: '';
+            $this->{$nome} = isset($campo['valore']) ? $campo['valore'] : '';
         }
     }
 
