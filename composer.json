@@ -1,6 +1,7 @@
 {
     "name": "devcode-it/cbi",
     "description": "Libreria per la gestione del formato CBI per pagamenti RiBa",
+    "license": "GPL-3.0",
     "authors": [{
         "name": "DevCode s.n.c",
         "email": "info@devcode.it"
@@ -8,6 +9,11 @@
     "type": "library",
     "require": {
         "php": ">=7.1"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.18",
+        "nesbot/carbon": "^2.45",
+        "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "psr-4": {
