@@ -30,13 +30,14 @@ class RibaAbiCbi
      *                                 [3] => data_creazione variabile lunghezza 6 numerico formato GGMAA
      *                                 [4] => nome_supporto variabile lunghezza 20 alfanumerico
      *                                 [5] => codice_divisa variabile lunghezza 1 alfanumerico opzionale default "E"
-     *                                 [6] => ragione_soc1_creditore variabile lunghezza 24 alfanumerico
-     *                                 [7] => ragione_soc2_creditore variabile lunghezza 24 alfanumerico
-     *                                 [8] => indirizzo_creditore variabile lunghezza 24 alfanumerico
-     *                                 [9] => cap_citta_prov_creditore variabile lunghezza 24 alfanumerico
+     *                                 [6] => ragione_sociale_creditore variabile lunghezza 24 alfanumerico
+     *                                 [7] => indirizzo_creditore variabile lunghezza 24 alfanumerico
+     *                                 [8] => citta_creditore variabile lunghezza 24 alfanumerico
+     *                                 [9] => partita_iva_o_codice_fiscale_creditore variabile lunghezza 24 alfanumerico
      *                                 [10] => codice_fiscale_creditore variabile lunghezza 16 alfanumerico opzionale default ""
      *                                 [11] => codice SIA 5 caratteri alfanumerici
-     *                                 [12] => carry  booleano true per aggiungere i caratteri di fine rigo chr(13) e chr(10)
+     *                                 [12] => codice ABI 5 caratteri numerici: soggetto veicolatore
+     *                                 [13] => carry  booleano true per aggiungere i caratteri di fine rigo chr(13) e chr(10)
      *                                 ]
      * @param array $ricevute_bancarie = [
      *                                 [0] => numero ricevuta lunghezza 10 numerico
@@ -61,11 +62,11 @@ class RibaAbiCbi
     public function creaFile($intestazione, $ricevute_bancarie)
     {
         $eol = '';
-        if (isset($intestazione[12])) {
+        if (isset($intestazione[13])) {
             $eol = chr(13).chr(10);
         }
 
-        $contenuto = $this->RecordIB($intestazione[0], $intestazione[3], $intestazione[4], $intestazione[5], $intestazione[11], $intestazione[1]).$eol;
+        $contenuto = $this->RecordIB($intestazione[0], $intestazione[3], $intestazione[4], $intestazione[5], $intestazione[11], $intestazione[1], $intestazione[12]).$eol;
         foreach ($ricevute_bancarie as $ricevuta) { //estraggo le ricevute dall'array
             ++$this->progressivo;
             $contenuto .= $this->Record14($ricevuta[1], $ricevuta[2], $intestazione[0], $intestazione[1], $intestazione[2], $ricevuta[8], $ricevuta[9], $ricevuta[11]).$eol;
@@ -73,7 +74,7 @@ class RibaAbiCbi
             $contenuto .= $this->Record30($ricevuta[3], $ricevuta[4]).$eol;
             $contenuto .= $this->Record40($ricevuta[5], $ricevuta[6], $ricevuta[7], $ricevuta[10], $ricevuta[13]).$eol;
             $contenuto .= $this->Record50($ricevuta[12].' '.$ricevuta[14], $intestazione[10]).$eol;
-            $contenuto .= $this->Record51($ricevuta[0]).$eol;
+            $contenuto .= $this->Record51($ricevuta[0], $intestazione[6]).$eol;
             $contenuto .= $this->Record70().$eol;
         }
         $contenuto .= $this->RecordEF().$eol;
@@ -87,7 +88,7 @@ class RibaAbiCbi
      *
      * @return string
      */
-    protected function padString($string, $length)
+    protected function padString($string, $length, $pad = STR_PAD_RIGHT)
     {
         // Sostituzione di alcuni simboli noti
         $replaces = [
@@ -97,7 +98,7 @@ class RibaAbiCbi
         ];
         $string = str_replace(array_keys($replaces), array_values($replaces), $string);
 
-        return substr(str_pad($string, $length), 0, $length);
+        return substr(str_pad($string, $length, " ", $pad), 0, $length);
     }
 
     /**
@@ -120,19 +121,21 @@ class RibaAbiCbi
      * @param $codice_divisa
      * @param $sia_code
      * @param $cab_assuntrice
+     * @param $soggetto_veicolatore
      *
      * @return string
      */
-    protected function RecordIB($abi_assuntrice, $data_creazione, $nome_supporto, $codice_divisa, $sia_code, $cab_assuntrice)
+    protected function RecordIB($abi_assuntrice, $data_creazione, $nome_supporto, $codice_divisa, $sia_code, $cab_assuntrice, $soggetto_veicolatore)
     {
         $this->assuntrice = $this->padNumber($abi_assuntrice, 5);
+        $this->soggetto_veicolatore = $this->padNumber($soggetto_veicolatore, 5);
         $this->cab_ass = $this->padNumber($cab_assuntrice, 5);
         $this->data = str_pad($data_creazione, 6, '0');
         $this->valuta = substr($codice_divisa, 0, 1);
         $this->supporto = str_pad($nome_supporto, 20, '*', STR_PAD_LEFT);
         $this->sia_code = $this->padNumber($sia_code, 5);
 
-        return ' IB'.$this->sia_code.$this->assuntrice.$this->data.$this->supporto.str_repeat(' ', 65).'1$'.$this->assuntrice.str_repeat(' ', 2).$this->valuta.str_repeat(' ', 6);
+        return ' IB'.$this->sia_code.$this->assuntrice.$this->data.$this->supporto.str_repeat(' ', 65).( $this->soggetto_veicolatore != "" ? $this->tipo_flusso.$this->qualificatore_flusso.$this->soggetto_veicolatore : str_repeat(' ', 7) ).$this->valuta.str_repeat(' ', 6);
     }
 
     /**
@@ -160,22 +163,22 @@ class RibaAbiCbi
     }
 
     /**
-     * @param string $ragione_soc1_creditore
-     * @param string $ragione_soc2_creditore
+     * @param string $ragione_sociale_creditore
      * @param string $indirizzo_creditore
-     * @param string $cap_citta_prov_creditore
+     * @param string $citta_creditore
+     * @param string $partita_iva_o_codice_fiscale_creditore
      *
      * @return string
      */
-    protected function Record20($ragione_soc1_creditore, $ragione_soc2_creditore, $indirizzo_creditore, $cap_citta_prov_creditore)
+    protected function Record20($ragione_sociale_creditore, $indirizzo_creditore, $citta_creditore, $partita_iva_o_codice_fiscale_creditore)
     {
-        $this->creditore = str_pad($ragione_soc1_creditore, 24);
+        $this->creditore = str_pad($ragione_sociale_creditore, 24);
 
         return ' 20'.$this->padNumber($this->progressivo, 7)
             .substr($this->creditore, 0, 24)
-            .$this->padString($ragione_soc2_creditore, 24)
             .$this->padString($indirizzo_creditore, 24)
-            .$this->padString($cap_citta_prov_creditore, 24)
+            .$this->padString($citta_creditore, 24)
+            .$this->padString($partita_iva_o_codice_fiscale_creditore, 24, STR_PAD_LEFT)
             .str_repeat(' ', 14);
     }
 
@@ -231,11 +234,11 @@ class RibaAbiCbi
      *
      * @return string
      */
-    protected function Record51($numero_ricevuta_creditore)
+    protected function Record51($numero_ricevuta_creditore, $denominazione_creditore)
     {
         return ' 51'.$this->padNumber($this->progressivo, 7)
             .$this->padNumber($numero_ricevuta_creditore, 10)
-            .substr($this->creditore, 0, 20)
+            .substr($denominazione_creditore, 0, 20)
             .str_repeat(' ', 80);
     }
 

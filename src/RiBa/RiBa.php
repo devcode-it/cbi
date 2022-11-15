@@ -93,8 +93,11 @@ class RiBa
         $ib->nome_supporto = $intestazione->nome_supporto;
         $ib->data_creazione = $intestazione->data_creazione;
 
-        $ib->tipo_flusso = 1;
-        $ib->soggetto_veicolare = $intestazione->abi;
+		if ( $intestazione->soggetto_veicolatore != "" ) {
+			$ib->tipo_flusso = 1;
+			$ib->qualificatore_flusso = '$';
+		}
+        $ib->soggetto_veicolatore = $intestazione->soggetto_veicolatore;
         $contenuto .= $ib->toCBI().$eol;
 
         // Iterazione tra le ricevute interne al RiBa
@@ -123,10 +126,10 @@ class RiBa
             // Record 20
             $r20 = new Record20();
             $r20->numero_progressivo = $progressivo;
-            $r20->descrizione_creditore_1 = $intestazione->ragione_soc1_creditore;
-            $r20->descrizione_creditore_2 = $intestazione->ragione_soc2_creditore;
-            $r20->descrizione_creditore_3 = $intestazione->indirizzo_creditore;
-            $r20->descrizione_creditore_4 = $intestazione->cap_citta_prov_creditore;
+            $r20->descrizione_creditore_1 = $intestazione->ragione_sociale_creditore;
+            $r20->descrizione_creditore_2 = $intestazione->indirizzo_creditore;
+            $r20->descrizione_creditore_3 = $intestazione->citta_creditore;
+            $r20->descrizione_creditore_4 = $intestazione->partita_iva_o_codice_fiscale_creditore;
             $contenuto .= $r20->toCBI().$eol;
 
             // Record 30
@@ -159,7 +162,7 @@ class RiBa
             $r51 = new Record51();
             $r51->numero_progressivo = $progressivo;
             $r51->numero_ricevuta = $ricevuta->numero_ricevuta;
-            $r51->denominazione_creditore = $intestazione->ragione_soc1_creditore;
+            $r51->denominazione_creditore = $intestazione->ragione_sociale_creditore;
             $contenuto .= $r51->toCBI().$eol;
 
             // Record 70
