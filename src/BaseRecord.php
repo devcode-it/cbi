@@ -114,6 +114,11 @@ abstract class BaseRecord implements RecordInterface
      */
     protected function padString(?string $string, int $length, $pad = STR_PAD_RIGHT)
     {
+        
+        if ( $pad == "" ) {
+			$pad = STR_PAD_RIGHT;
+		}
+        
         // Sostituzione di alcuni simboli noti
         $replaces = [
             '&#039;' => "'",
