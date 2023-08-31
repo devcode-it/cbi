@@ -10,7 +10,7 @@ Requisito minimo di PHP >= 7.1.
 
 L'installazione della libreria è possibile tramite [Composer](https://getcomposer.org/):
 ```bash
-php composer require devcode-it/cbi
+php composer require itajackass/cbi
 ```
 
 ## Utilizzo
