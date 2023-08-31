@@ -1,10 +1,10 @@
 {
-    "name": "devcode-it/cbi",
+    "name": "itajackass/cbi",
     "description": "Libreria per la gestione del formato CBI per pagamenti RiBa",
     "license": "GPL-3.0",
     "authors": [{
-        "name": "DevCode s.n.c",
-        "email": "info@devcode.it"
+        "name": "GLR",
+        "email": "lodirizzini.giuseppe@gmail.com"
     }],
     "type": "library",
     "require": {
